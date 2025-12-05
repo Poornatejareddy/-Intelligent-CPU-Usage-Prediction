@@ -14,7 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt -r requirements-app.txt
 COPY . .
 
 # Run the training pipeline to generate the model
-RUN python src/preprocess.py && \
+# First generate the data, then preprocess, train, and evaluate
+RUN python src/generate_data.py && \
+    python src/preprocess.py && \
     python src/train.py && \
     python src/evaluate.py && \
     echo "✓ Model training completed successfully"
