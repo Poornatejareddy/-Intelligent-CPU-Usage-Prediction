@@ -52,14 +52,43 @@ st.markdown("""
 # Load model
 @st.cache_resource
 def load_model():
-    with open('models/model.pkl', 'rb') as f:
+    import os
+    model_path = 'models/model.pkl'
+    
+    if not os.path.exists(model_path):
+        # Provide debugging information
+        cwd = os.getcwd()
+        models_dir_exists = os.path.exists('models')
+        models_contents = os.listdir('models') if models_dir_exists else []
+        
+        error_msg = f"""
+        ### Model file not found!
+        
+        **Expected path:** `{model_path}`  
+        **Current directory:** `{cwd}`  
+        **Models directory exists:** {models_dir_exists}  
+        **Models directory contents:** {models_contents if models_contents else 'Empty or does not exist'}
+        
+        ### How to fix:
+        1. **Local development:** Run the training pipeline:
+           ```bash
+           python src/preprocess.py
+           python src/train.py
+           python src/evaluate.py
+           ```
+        
+        2. **Docker/Render deployment:** Ensure the Dockerfile runs the training pipeline during build.
+        """
+        raise FileNotFoundError(error_msg)
+    
+    with open(model_path, 'rb') as f:
         model = pickle.load(f)
     return model
 
 try:
     model = load_model()
-except FileNotFoundError:
-    st.error("Model file not found. Please run the training pipeline first.")
+except FileNotFoundError as e:
+    st.error(str(e))
     st.stop()
 
 # Header
